@@ -1,0 +1,14 @@
+syntax = 'proto3';
+
+package demo;
+
+message Author {
+  string first_name = 1;
+  string last_name = 2;
+}
+
+message Message {
+  string data = 1;
+  Author author = 2;
+  int32 created_ts = 3;
+}

@@ -16,7 +16,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,PLAINTEXT://localhost:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -36,19 +36,17 @@ services:
       - ./zk-data:/var/lib/zookeeper/data \
       - ./zk-txn-logs:/var/lib/zookeeper/log \
 
-  kafka-actualizer:
-    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${CONFLUENT_SCHEMA_REGISTRY}
+    ports:
+      - ${SCHEMA_REGISTRY_PORT}:8081
+    restart: always
     depends_on:
+      - zookeeper
       - kafka
-    volumes:
-      - ./docker/wait-for-it.sh:/wait-for-it.sh
-    command: |
-      bash -c '/wait-for-it.sh --timeout=0 -s kafka:9092 && \
-      kafka-topics --create --if-not-exists --topic raw-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
-      kafka-topics --create --if-not-exists --topic pydantic-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
-      kafka-topics --create --if-not-exists --topic proto-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
-      kafka-topics --create --if-not-exists --topic avro-data --partitions 8 --replication-factor 1 --zookeeper zookeeper:2181 && \
-      exit 0'
     environment:
-      KAFKA_BROKER_ID: ignored
-      KAFKA_ZOOKEEPER_CONNECT: ignored
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka:9092"
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+      SCHEMA_REGISTRY_DEBUG: "true"

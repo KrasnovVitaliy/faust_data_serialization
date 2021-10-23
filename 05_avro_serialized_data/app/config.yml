@@ -4,5 +4,5 @@ LOGGING_FORMAT: '%(asctime)-15s | %(levelname)s | %(filename)s | %(lineno)d: %(m
 WEB_HOST: '127.0.0.1'
 WEB_PORT: 8000
 
-KAFKA_BROKER: "127.0.0.1:29092"
-SRC_DATA_TOPIC: "raw-data"
+KAFKA_BROKER: "127.0.0.1:9093"
+SRC_DATA_TOPIC: "avro-data"
